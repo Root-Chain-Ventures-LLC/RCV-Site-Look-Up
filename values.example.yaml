@@ -1,0 +1,37 @@
+# Example values for installing Site Look Up standalone via the rcv-module chart.
+#   helm install site-look-up oci://ghcr.io/root-chain-ventures-llc/helm/rcv-module \
+#     --version 0.1.0 -n rcv -f values.example.yaml
+# (Assumes the NOC Portal is already running in the same namespace as `rcv-noc-portal`.)
+
+moduleName: site-look-up
+image:
+  repository: ghcr.io/root-chain-ventures-llc/site-look-up
+  tag: "latest"            # or pin to v0.1.0
+containerPort: 3000
+healthPath: /health
+
+postgres:
+  enabled: true            # in-chart PostgreSQL; set false to use your own
+  user: sitelookup
+  database: sitelookup
+  password: "REPLACE_WITH_PG_PASSWORD"
+
+databaseUrlEnv: DATABASE_URL
+databaseUrlTemplate: "postgresql://sitelookup:$(POSTGRES_PASSWORD)@{{host}}:5432/sitelookup"
+
+env:
+  PORTAL_URL: "http://rcv-noc-portal:8000"
+  OIDC_ENABLED: "true"
+  OIDC_ISSUER: "https://noc.example.com"
+  OIDC_CLIENT_ID: "site-look-up"
+  OIDC_ROLE_CLAIM: "role"
+  OIDC_ROLE_MAP: '{"admin":"ADMIN","viewer":"VIEWER"}'
+
+secretEnv:
+  JWT_SECRET: "REPLACE_WITH_JWT_SECRET"
+  PORTAL_API_KEY: "REPLACE_WITH_PORTAL_API_KEY"
+  OIDC_CLIENT_SECRET: "REPLACE_WITH_OIDC_CLIENT_SECRET"
+
+ingress:
+  enabled: true
+  host: sites.example.com
